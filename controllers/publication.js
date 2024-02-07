@@ -50,6 +50,69 @@ const save = async (req, res) => {
 
 
 // Sacar una sola publicaciones
+const detail = async (req, res) => {
+    try {
+        // Sacar id de publicacion
+        const publicationId = req.params.id;
+
+        // Utilizar async/await para esperar la respuesta de la consulta
+        const publicationStored = await Publication.findById(publicationId);
+
+        if (!publicationStored) {
+            return res.status(404).send({
+                status: "error",
+                message: "No existe la publicacion"
+            });
+        }
+
+        return res.status(200).send({
+            status: "success",
+            message: "Mostrar publicacion",
+            publication: publicationStored
+        });
+    } catch (error) {
+        console.error(error);
+        return res.status(500).send({
+            status: "error",
+            message: "Error interno del servidor"
+        });
+    }
+};
+
+// Eliminar publicaciones
+
+const remove = async (req, res) => {
+    try {
+        const publicationId = req.params.id;
+
+        const query = Publication.findOneAndDelete({ "user": req.user.id, "_id": publicationId });
+
+        const deletedPost = await query.exec();
+
+        if (!deletedPost) {
+            console.log('No existe el post');
+            return res.status(404).send({
+                status: "error",
+                message: "No existe el post"
+            });
+        }
+
+        console.log('Post borrado con éxito:', deletedPost);
+
+        return res.status(200).send({
+            status: "success",
+            message: "Post borrado con éxito",
+            user: req.user.name,
+            deletedPost
+        });
+    } catch (error) {
+        console.error(error);
+        return res.status(500).send({
+            status: "error",
+            message: "Error interno del servidor"
+        });
+    }
+};
 
 // Listas publicaciones
 
@@ -64,5 +127,7 @@ const save = async (req, res) => {
 
 module.exports = {
     pruebaPublication,
-    save
+    save,
+    detail,
+    remove
 }
